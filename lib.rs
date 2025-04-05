@@ -91,7 +91,7 @@ pub fn parse_fragment<I>(chars: &mut I ) -> (JsonData,char)
            }
            ' ' | '\t' | '\r' | '\n' => {
                match state {
-                   JsonState::Start | JsonState::ArrState => (),
+                   JsonState::Start | JsonState::ArrState | JsonState::ArrNext => (),
                    JsonState::ObjName => {
                         field_name.push(c)
                    }
