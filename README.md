@@ -9,7 +9,7 @@ Just pass a JSON string to the crate as bellow
 extern crate simjson;
 ...
 
-let json = simjson::parse("[{\"name\":\"malina\", \"age\":19},{}, 45.8]");
+let json = simjson::parse(r#"[{"name":"malvina", "age":19},{}, 45.8]"#);
 println!{"{json:?}"}
 ```
 
