@@ -1,11 +1,11 @@
 # Simple JSON (simjson)
 
 ## Purpose
-Simple JSON parser for Rust
+Simple JSON is a parser in Rust and for Rust
 
 ## Usage
 Just pass a JSON string to the crate as bellow
-```
+```rust
 extern crate simjson;
 ...
 
