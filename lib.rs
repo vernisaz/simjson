@@ -43,6 +43,26 @@ enum JsonState {
     NulL
 }
 
+pub fn get_path_as_text(json: &JsonData, path: &impl AsRef<str>) -> Option<String> {
+    let comps = path.as_ref().split('/');
+    let mut json = json;
+    for cur in comps {
+        match json {
+            JsonData::Data(json_n) => {
+                match json_n.get(cur) {
+                    Some(json_n) => json = json_n,
+                    _ => return None
+                }
+            },
+            _ => ()
+        }
+    }
+    match json {
+        JsonData::Text(text) => Some(text.clone()),
+        _ => None
+    }
+}
+
 pub fn parse(json: &str) -> JsonData { // &impl AsRef<str>, Result<JsonData, String>
     let binding = json.to_string();
     let mut chars = binding.chars();

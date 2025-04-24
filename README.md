@@ -4,13 +4,21 @@
 Simple JSON is a parser in Rust and for Rust
 
 ## Usage
-Just pass a JSON string to the crate as bellow
+Just pass a JSON string to the crate as bellow,
 ```rust
 extern crate simjson;
 ...
 
 let json = simjson::parse(r#"[{"name":"malvina", "age":19},{}, 45.8]"#);
 println!{"{json:?}"}
+```
+Use something as below to extract a particular data,
+```rust
+extern crate simjson;
+...
+
+let json = simjson::parse(r#"{"name":"malvina", "parent":{"name": "Maria"}}"#);
+println!("parent:{}", simjson::get_path_as_text(&json, &"parent/name").unwrap_or("unknown".to_string()));
 ```
 
 ## Microlibrary
