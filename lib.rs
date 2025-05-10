@@ -69,7 +69,7 @@ pub fn parse(json: &str) -> JsonData { // &impl AsRef<str>, Result<JsonData, Str
     parse_fragment(&mut chars).0
 }
 
-pub fn parse_fragment<I>(chars: &mut I ) -> (JsonData,char)
+pub fn parse_fragment<I>(chars: &mut I ) -> (JsonData,char) // TODO return Result<(JsonData,char),(String,usize,usize)>
     where I: Iterator<Item = char>,  {
     let mut field_value = String::new();
      let mut field_name = String::new();
