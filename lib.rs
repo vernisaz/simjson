@@ -30,6 +30,8 @@ enum JsonState {
     ArrNext,
     EscValue,
     EscName,
+    UniDigVal,
+    UniDigName,
     ErrState,
     BoolT,
     BoolR,
@@ -80,6 +82,7 @@ pub fn parse_fragment<I>(chars: &mut I ) -> (JsonData,char) // TODO return Resul
      let mut neg_exp = false;
      let mut arr = Vec::new();
      let mut obj = HashMap::new();
+     let mut dig_inx = String::new(); dig_inx.reserve(4);
     let mut state = Default::default();
     while let Some(c) = chars.next() {
         match c {
@@ -325,6 +328,52 @@ pub fn parse_fragment<I>(chars: &mut I ) -> (JsonData,char) // TODO return Resul
                         neg = false;
                         num_value = c.to_digit(10).unwrap() as _
                     }
+                    JsonState::UniDigVal | JsonState::UniDigName => {
+                        dig_inx.push(c) ;
+                        if dig_inx.len() == 4 {
+                            match u32::from_str_radix(&dig_inx, 16) {
+                                Ok(number) => {//println!("The number is: {}", number);
+                                    match std::char::from_u32(number) { // as u32
+                                        Some(character) => {//println!("The character is: {}", character);
+                                            match state {
+                                                JsonState::UniDigVal => {
+                                                    field_value.push(character);
+                                                    state = JsonState::ObjData
+                                                }
+                                                JsonState::UniDigName => {
+                                                    field_name.push(character);
+                                                    state = JsonState::ObjName
+                                                },
+                                                 _ => unreachable!()
+                                            }
+                                        },
+                                        None => {eprintln!("Error: Invalid Unicode scalar value!");
+                                             match state {
+                                                JsonState::UniDigVal => {
+                                                    state = JsonState::ObjData
+                                                }
+                                                JsonState::UniDigName => {
+                                                    state = JsonState::ObjName
+                                                },
+                                                 _ => unreachable!()
+                                            }
+                                        },
+                                    }
+                                },
+                                Err(e) => { eprintln!("Failed to convert: {}", e);
+                                     match state {
+                                        JsonState::UniDigVal => {
+                                            state = JsonState::ObjData
+                                        }
+                                        JsonState::UniDigName => {
+                                            state = JsonState::ObjName
+                                        },
+                                        _ => unreachable!()
+                                    }
+                                },
+                            }
+                        }
+                    }
                     _ => todo!("state {state:?} for {c}")
                 }
             }
@@ -464,6 +513,15 @@ pub fn parse_fragment<I>(chars: &mut I ) -> (JsonData,char) // TODO return Resul
                     JsonState::NulN => {
                         state = JsonState::NulU
                     }
+                    
+                    JsonState::EscName => {
+                        dig_inx.clear();
+                        state = JsonState::UniDigName
+                    },
+                    JsonState::EscValue => {
+                        dig_inx.clear();
+                        state = JsonState::UniDigVal
+                    },
                     _ => todo!("state {state:?}")
                 }
             }
@@ -514,6 +572,53 @@ pub fn parse_fragment<I>(chars: &mut I ) -> (JsonData,char) // TODO return Resul
                     }
                     JsonState::BoolF => {
                         state = JsonState::BoolA
+                    }
+                    
+                    JsonState::UniDigVal | JsonState::UniDigName => {
+                        dig_inx.push(c) ;
+                        if dig_inx.len() == 4 {
+                            match u32::from_str_radix(&dig_inx, 16) {
+                                Ok(number) => {//println!("The number is: {}", number);
+                                    match std::char::from_u32(number) {
+                                        Some(character) => {//println!("The character is: {}", character);
+                                            match state {
+                                                JsonState::UniDigVal => {
+                                                    field_value.push(character);
+                                                    state = JsonState::ObjData
+                                                }
+                                                JsonState::UniDigName => {
+                                                    field_name.push(character);
+                                                    state = JsonState::ObjName
+                                                },
+                                                 _ => unreachable!()
+                                            }
+                                        },
+                                        None => {eprintln!("Error: Invalid Unicode scalar value!");
+                                             match state {
+                                                JsonState::UniDigVal => {
+                                                    state = JsonState::ObjData
+                                                }
+                                                JsonState::UniDigName => {
+                                                    state = JsonState::ObjName
+                                                },
+                                                 _ => unreachable!()
+                                            }
+                                        },
+                                    }
+                                },
+                                Err(e) => { eprintln!("Failed to convert: {}", e);
+                                     match state {
+                                        JsonState::UniDigVal => {
+                                            state = JsonState::ObjData
+                                        }
+                                        JsonState::UniDigName => {
+                                            state = JsonState::ObjName
+                                        },
+                                        _ => unreachable!()
+                                    }
+                                },
+                            }
+                        }
                     }
                     _ => todo!("state {state:?}")
                 }
@@ -568,6 +673,63 @@ pub fn parse_fragment<I>(chars: &mut I ) -> (JsonData,char) // TODO return Resul
                     _ => todo!("state {state:?}")
                 } 
             }
+            'b' | 'c' | 'd' => {
+                match state {
+                    JsonState::ObjName => {
+                        field_name.push(c)
+                    }
+                    JsonState::ObjData => {
+                        field_value.push(c)
+                    }
+                    JsonState::UniDigVal | JsonState::UniDigName => {
+                        dig_inx.push(c) ;
+                        if dig_inx.len() == 4 {
+                            match u32::from_str_radix(&dig_inx, 16) {
+                                Ok(number) => {//println!("The number is: {}", number);
+                                    match std::char::from_u32(number) {
+                                        Some(character) => {//println!("The character is: {}", character);
+                                            match state {
+                                                JsonState::UniDigVal => {
+                                                    field_value.push(character);
+                                                    state = JsonState::ObjData
+                                                }
+                                                JsonState::UniDigName => {
+                                                    field_name.push(character);
+                                                    state = JsonState::ObjName
+                                                },
+                                                 _ => unreachable!()
+                                            }
+                                        },
+                                        None => {eprintln!("Error: Invalid Unicode scalar value!");
+                                             match state {
+                                                JsonState::UniDigVal => {
+                                                    state = JsonState::ObjData
+                                                }
+                                                JsonState::UniDigName => {
+                                                    state = JsonState::ObjName
+                                                },
+                                                 _ => unreachable!()
+                                            }
+                                        },
+                                    }
+                                },
+                                Err(e) => { eprintln!("Failed to convert: {}", e);
+                                     match state {
+                                        JsonState::UniDigVal => {
+                                            state = JsonState::ObjData
+                                        }
+                                        JsonState::UniDigName => {
+                                            state = JsonState::ObjName
+                                        },
+                                        _ => unreachable!()
+                                    }
+                                },
+                            }
+                        }
+                    }
+                    _ => todo!("state {state:?}")
+                } 
+            }
             _ => {
                 match state {
                     JsonState::Start => state = JsonState::ErrState,
@@ -578,6 +740,16 @@ pub fn parse_fragment<I>(chars: &mut I ) -> (JsonData,char) // TODO return Resul
                     JsonState::ObjData => {
                         field_value.push(c)
                     },
+                    JsonState::EscName => {
+                        state = JsonState::ObjName;
+                        field_name.push('\\');
+                        field_name.push(c)
+                    }
+                    JsonState::EscValue => {
+                        state = JsonState::ObjData;
+                        field_value.push('\\');
+                        field_value.push(c)
+                    }
                     _ => todo!("state {state:?} for {c}")
                    
                 }
