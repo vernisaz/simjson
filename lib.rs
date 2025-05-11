@@ -205,6 +205,27 @@ pub fn parse_fragment<I>(chars: &mut I ) -> (JsonData,char) // TODO return Resul
                    
                 }
             }
+            '/' => {
+                match state {
+                    JsonState::Start => state = JsonState::ErrState,
+                    JsonState::ObjName => {
+                        field_name.push(c)
+                    }
+                    JsonState::ObjData => {
+                        field_value.push(c)
+                    }
+                    JsonState::EscName => {
+                        field_name.push(c);
+                        state = JsonState::ObjName
+                    },
+                    JsonState::EscValue => {
+                        field_value.push(c);
+                        state = JsonState::ObjData
+                    },
+                    _ => todo!()
+                   
+                }
+            }
             ':' => {
                 match state {
                     JsonState::Start  => state = JsonState::ErrState,
