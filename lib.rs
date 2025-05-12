@@ -1,5 +1,7 @@
 use std::collections::HashMap;
 
+pub const VERSION: &str = "1.01:011";
+
 #[derive(Debug, Clone, PartialEq)]
 pub enum JsonData {
     Text(String),
@@ -128,6 +130,11 @@ pub fn parse_fragment<I>(chars: &mut I ) -> (JsonData,char) // TODO return Resul
                    }
                    JsonState::ExpNameSep => {
                    }
+                   JsonState::EscValue => {
+                        state = JsonState::ObjData;
+                        //field_value.push('\\');
+                        field_value.push(c)
+                    }
                     _ => todo!("state {state:?}")
                    
                }
@@ -164,6 +171,11 @@ pub fn parse_fragment<I>(chars: &mut I ) -> (JsonData,char) // TODO return Resul
                     JsonState::ArrState => {
                         arr.push(parse_fragment(chars).0)
                     }
+                    JsonState::EscValue => {
+                        state = JsonState::ObjData;
+                        field_value.push('\\');
+                        field_value.push(c)
+                    }
                     _ => todo!("state {state:?}")
                    
                 }
@@ -180,6 +192,11 @@ pub fn parse_fragment<I>(chars: &mut I ) -> (JsonData,char) // TODO return Resul
                     JsonState::ObjData => {
                         field_value.push(c)
                     },
+                    JsonState::EscValue => {
+                        state = JsonState::ObjData;
+                        field_value.push('\\');
+                        field_value.push(c)
+                    }
                     _ => todo!("state {state:?}")
                    
                 }
@@ -247,6 +264,11 @@ pub fn parse_fragment<I>(chars: &mut I ) -> (JsonData,char) // TODO return Resul
                             _ => state = JsonState::ObjExpEnd
                         }
                     }
+                    JsonState::EscValue => {
+                        state = JsonState::ObjData;
+                        field_value.push('\\');
+                        field_value.push(c)
+                    }
                     _ => todo!("state {state:?}")
                 }
             }
@@ -271,6 +293,11 @@ pub fn parse_fragment<I>(chars: &mut I ) -> (JsonData,char) // TODO return Resul
                         return (JsonData::Num(num_value *  10.0_f64.powf(exp_val)),c)
                     }
                     JsonState::ArrState | JsonState::ArrNext => return (JsonData::Arr(arr.clone()),c),
+                    JsonState::EscValue => {
+                        state = JsonState::ObjData;
+                        field_value.push('\\');
+                        field_value.push(c)
+                    }
                     _ => todo!("state {state:?}")
                    
                 }
@@ -295,6 +322,11 @@ pub fn parse_fragment<I>(chars: &mut I ) -> (JsonData,char) // TODO return Resul
                     }
                     JsonState::ObjExpEnd => return (JsonData::Data(obj.clone()),char::from_u32(0).unwrap()),
                     JsonState::ObjState => return (JsonData::None,c),
+                    JsonState::EscValue => {
+                        state = JsonState::ObjData;
+                        field_value.push('\\');
+                        field_value.push(c)
+                    }
                     _ => todo!("state {state:?}")
                     
                 }
@@ -395,6 +427,11 @@ pub fn parse_fragment<I>(chars: &mut I ) -> (JsonData,char) // TODO return Resul
                             }
                         }
                     }
+                    JsonState::EscValue => {
+                        state = JsonState::ObjData;
+                        field_value.push('\\');
+                        field_value.push(c)
+                    }
                     _ => todo!("state {state:?} for {c}")
                 }
             }
@@ -411,6 +448,11 @@ pub fn parse_fragment<I>(chars: &mut I ) -> (JsonData,char) // TODO return Resul
                         field_value.push(c);
                         state = JsonState::MantissaValue
                     },
+                    JsonState::EscValue => {
+                        state = JsonState::ObjData;
+                        field_value.push('\\');
+                        field_value.push(c)
+                    }
                     _ => todo!()
                    
                 }
@@ -421,6 +463,11 @@ pub fn parse_fragment<I>(chars: &mut I ) -> (JsonData,char) // TODO return Resul
                     JsonState::ObjData => field_value.push(c),
                     JsonState::Start => state = JsonState::NegNum,
                     JsonState::ExpExpValue => state = JsonState::NegExpNum,
+                    JsonState::EscValue => {
+                        state = JsonState::ObjData;
+                        field_value.push('\\');
+                        field_value.push(c)
+                    }
                     _ => todo!("state {state:?}")
                 }
             }
@@ -437,6 +484,11 @@ pub fn parse_fragment<I>(chars: &mut I ) -> (JsonData,char) // TODO return Resul
                         //exp_val = 0.0
                         state = JsonState::ExpExpValue
                     },
+                    JsonState::EscValue => {
+                        state = JsonState::ObjData;
+                        field_value.push('\\');
+                        field_value.push(c)
+                    }
                     JsonState::UniDigVal | JsonState::UniDigName => {
                         dig_inx.push(c) ;
                         if dig_inx.len() == 4 {
@@ -533,6 +585,11 @@ pub fn parse_fragment<I>(chars: &mut I ) -> (JsonData,char) // TODO return Resul
                             _ => state = JsonState::ArrState
                         }
                     }
+                    JsonState::EscValue => {
+                        state = JsonState::ObjData;
+                        field_value.push('\\');
+                        field_value.push(c)
+                    }
                     _ => todo!("state {state:?}")
                 }
             }
@@ -543,6 +600,10 @@ pub fn parse_fragment<I>(chars: &mut I ) -> (JsonData,char) // TODO return Resul
                     }
                     JsonState::ObjData => {
                         field_value.push(c)
+                    }
+                    JsonState::EscValue => {
+                        state = JsonState::ObjData;
+                        field_value.push('\t')
                     }
                     JsonState::Start => {
                         state = JsonState::BoolT
@@ -561,6 +622,10 @@ pub fn parse_fragment<I>(chars: &mut I ) -> (JsonData,char) // TODO return Resul
                     }
                     JsonState::BoolT => {
                         state = JsonState::BoolR
+                    }
+                    JsonState::EscValue => {
+                        state = JsonState::ObjData;
+                        field_value.push('\r')
                     }
                     _ => todo!("state {state:?}")
                 }
@@ -657,6 +722,11 @@ pub fn parse_fragment<I>(chars: &mut I ) -> (JsonData,char) // TODO return Resul
                             }
                         }
                     }
+                    JsonState::EscValue => {
+                        state = JsonState::ObjData;
+                        field_value.push('\\');
+                        field_value.push(c)
+                    }
                     _ => todo!("state {state:?}")
                 }
             }
@@ -716,6 +786,10 @@ pub fn parse_fragment<I>(chars: &mut I ) -> (JsonData,char) // TODO return Resul
                                 },
                             }
                         }
+                    }
+                    JsonState::EscValue => {
+                        state = JsonState::ObjData;
+                        field_value.push(12 as char);
                     }
                     _ => todo!("state {state:?}")
                 } 
@@ -779,6 +853,11 @@ pub fn parse_fragment<I>(chars: &mut I ) -> (JsonData,char) // TODO return Resul
                             }
                         }
                     }
+                    JsonState::EscValue => {
+                        state = JsonState::ObjData;
+                        field_value.push('\\');
+                        field_value.push(c)
+                    }
                     _ => todo!("state {state:?}")
                 }
             }
@@ -800,6 +879,11 @@ pub fn parse_fragment<I>(chars: &mut I ) -> (JsonData,char) // TODO return Resul
                     JsonState::NulL => {
                         return (JsonData::Null,c)
                     }
+                    JsonState::EscValue => {
+                        state = JsonState::ObjData;
+                        field_value.push('\\');
+                        field_value.push(c)
+                    }
                     _ => todo!("state {state:?}")
                 }
             }
@@ -815,6 +899,11 @@ pub fn parse_fragment<I>(chars: &mut I ) -> (JsonData,char) // TODO return Resul
                     JsonState::BoolL => {
                         state = JsonState::BoolS
                     }
+                    JsonState::EscValue => {
+                        state = JsonState::ObjData;
+                        field_value.push('\\');
+                        field_value.push(c)
+                    }
                     _ => todo!("state {state:?}")
                 }
             }
@@ -825,6 +914,10 @@ pub fn parse_fragment<I>(chars: &mut I ) -> (JsonData,char) // TODO return Resul
                     }
                     JsonState::ObjData => {
                         field_value.push(c)
+                    }
+                    JsonState::EscValue => {
+                        state = JsonState::ObjData;
+                        field_value.push('\n')
                     }
                     JsonState::Start => {
                         state = JsonState::NulN
@@ -884,6 +977,15 @@ pub fn parse_fragment<I>(chars: &mut I ) -> (JsonData,char) // TODO return Resul
                                     }
                                 },
                             }
+                        }
+                    }
+                    JsonState::EscValue => {
+                        state = JsonState::ObjData;
+                        if c == 'b' {
+                            field_value.push(0x8 as char);
+                        } else {
+                            field_value.push('\\');
+                            field_value.push(c)
                         }
                     }
                     _ => todo!("state {state:?}")
