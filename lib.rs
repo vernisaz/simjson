@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-pub const VERSION: &str = "1.01:011";
+pub const VERSION: &str = "1.01:012";
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum JsonData {
@@ -644,6 +644,27 @@ pub fn parse_fragment<I>(chars: &mut I ) -> (JsonData,char) // TODO return Resul
                     }
                     JsonState::NulN => {
                         state = JsonState::NulU
+                    }
+                    
+                    JsonState::EscName => {
+                        dig_inx.clear();
+                        state = JsonState::UniDigName
+                    },
+                    JsonState::EscValue => {
+                        dig_inx.clear();
+                        state = JsonState::UniDigVal
+                    },
+                    _ => todo!("state {state:?}")
+                }
+            }
+            'U' => {
+                match state {
+                    JsonState::Start => state = JsonState::ErrState,
+                    JsonState::ObjName => {
+                        field_name.push(c)
+                    }
+                    JsonState::ObjData => {
+                        field_value.push(c)
                     }
                     
                     JsonState::EscName => {
