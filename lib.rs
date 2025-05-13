@@ -1,6 +1,6 @@
-use std::collections::HashMap;
+use std::{collections::HashMap,char};
 
-pub const VERSION: &str = "1.01:012";
+pub const VERSION: &str = "1.01:014";
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum JsonData {
@@ -85,6 +85,7 @@ pub fn parse_fragment<I>(chars: &mut I ) -> (JsonData,char) // TODO return Resul
      let mut arr = Vec::new();
      let mut obj = HashMap::new();
      let mut dig_inx = String::new(); dig_inx.reserve(4);
+     let mut surrogates = [0_u16,0]; let mut surrogate_first = true;
     let mut state = Default::default();
     while let Some(c) = chars.next() {
         match c {
@@ -400,8 +401,35 @@ pub fn parse_fragment<I>(chars: &mut I ) -> (JsonData,char) // TODO return Resul
                                                  _ => unreachable!()
                                             }
                                         },
-                                        None => {eprintln!("Error: Invalid Unicode scalar value!");
-                                             match state {
+                                        None => {//eprintln!("Error: Invalid Unicode scalar value!");
+                                            if !surrogate_first {
+                                                surrogates[1] = number as u16;
+                                                match char::decode_utf16(surrogates).next() {
+                                                    Some(Ok(character)) => match state {
+                                                        JsonState::UniDigVal => {
+                                                            field_value.push(character)
+                                                        }
+                                                        JsonState::UniDigName => {
+                                                             field_name.push(character)
+                                                        },
+                                                         _ => unreachable!()
+                                                    }
+                                                    Some(Err(_)) => match state {
+                                                        JsonState::UniDigVal => {
+                                                            field_value.push(char::REPLACEMENT_CHARACTER)
+                                                        }
+                                                        JsonState::UniDigName => {
+                                                             field_name.push(char::REPLACEMENT_CHARACTER)
+                                                        },
+                                                         _ => unreachable!()
+                                                    }
+                                                    None => unreachable!()
+                                                }
+                                            } else {
+                                                surrogates[0] = number as u16;
+                                            }
+                                            surrogate_first = !surrogate_first;
+                                            match state {
                                                 JsonState::UniDigVal => {
                                                     state = JsonState::ObjData
                                                 }
@@ -508,7 +536,34 @@ pub fn parse_fragment<I>(chars: &mut I ) -> (JsonData,char) // TODO return Resul
                                                  _ => unreachable!()
                                             }
                                         },
-                                        None => {eprintln!("Error: Invalid Unicode scalar value!");
+                                        None => {//eprintln!("Error: Invalid Unicode scalar value!");
+                                            if !surrogate_first {
+                                                surrogates[1] = number as u16;
+                                                match char::decode_utf16(surrogates).next() {
+                                                    Some(Ok(character)) => match state {
+                                                        JsonState::UniDigVal => {
+                                                            field_value.push(character)
+                                                        }
+                                                        JsonState::UniDigName => {
+                                                             field_name.push(character)
+                                                        },
+                                                         _ => unreachable!()
+                                                    }
+                                                    Some(Err(_)) => match state {
+                                                        JsonState::UniDigVal => {
+                                                            field_value.push(char::REPLACEMENT_CHARACTER)
+                                                        }
+                                                        JsonState::UniDigName => {
+                                                             field_name.push(char::REPLACEMENT_CHARACTER)
+                                                        },
+                                                         _ => unreachable!()
+                                                    }
+                                                    None => unreachable!()
+                                                }
+                                            } else {
+                                                surrogates[0] = number as u16;
+                                            }
+                                            surrogate_first = !surrogate_first;
                                              match state {
                                                 JsonState::UniDigVal => {
                                                     state = JsonState::ObjData
@@ -716,7 +771,34 @@ pub fn parse_fragment<I>(chars: &mut I ) -> (JsonData,char) // TODO return Resul
                                                  _ => unreachable!()
                                             }
                                         },
-                                        None => {eprintln!("Error: Invalid Unicode scalar value!");
+                                        None => {//eprintln!("Error: Invalid Unicode scalar value!");
+                                            if !surrogate_first {
+                                                surrogates[1] = number as u16;
+                                                match char::decode_utf16(surrogates).next() {
+                                                    Some(Ok(character)) => match state {
+                                                        JsonState::UniDigVal => {
+                                                            field_value.push(character)
+                                                        }
+                                                        JsonState::UniDigName => {
+                                                             field_name.push(character)
+                                                        },
+                                                         _ => unreachable!()
+                                                    }
+                                                    Some(Err(_)) => match state {
+                                                        JsonState::UniDigVal => {
+                                                            field_value.push(char::REPLACEMENT_CHARACTER)
+                                                        }
+                                                        JsonState::UniDigName => {
+                                                             field_name.push(char::REPLACEMENT_CHARACTER)
+                                                        },
+                                                         _ => unreachable!()
+                                                    }
+                                                    None => unreachable!()
+                                                }
+                                            } else {
+                                                surrogates[0] = number as u16;
+                                            }
+                                            surrogate_first = !surrogate_first;
                                              match state {
                                                 JsonState::UniDigVal => {
                                                     state = JsonState::ObjData
@@ -781,7 +863,34 @@ pub fn parse_fragment<I>(chars: &mut I ) -> (JsonData,char) // TODO return Resul
                                                  _ => unreachable!()
                                             }
                                         },
-                                        None => {eprintln!("Error: Invalid Unicode scalar value!");
+                                        None => {//eprintln!("Error: Invalid Unicode scalar value!");
+                                             if !surrogate_first {
+                                                surrogates[1] = number as u16;
+                                                match char::decode_utf16(surrogates).next() {
+                                                    Some(Ok(character)) => match state {
+                                                        JsonState::UniDigVal => {
+                                                            field_value.push(character)
+                                                        }
+                                                        JsonState::UniDigName => {
+                                                             field_name.push(character)
+                                                        },
+                                                         _ => unreachable!()
+                                                    }
+                                                    Some(Err(_)) => match state {
+                                                        JsonState::UniDigVal => {
+                                                            field_value.push(char::REPLACEMENT_CHARACTER)
+                                                        }
+                                                        JsonState::UniDigName => {
+                                                             field_name.push(char::REPLACEMENT_CHARACTER)
+                                                        },
+                                                         _ => unreachable!()
+                                                    }
+                                                    None => unreachable!()
+                                                }
+                                            } else {
+                                                surrogates[0] = number as u16;
+                                            }
+                                            surrogate_first = !surrogate_first;
                                              match state {
                                                 JsonState::UniDigVal => {
                                                     state = JsonState::ObjData
@@ -847,7 +956,34 @@ pub fn parse_fragment<I>(chars: &mut I ) -> (JsonData,char) // TODO return Resul
                                                  _ => unreachable!()
                                             }
                                         },
-                                        None => {eprintln!("Error: Invalid Unicode scalar value!");
+                                        None => {//eprintln!("Error: Invalid Unicode scalar value!");
+                                            if !surrogate_first {
+                                                surrogates[1] = number as u16;
+                                                match char::decode_utf16(surrogates).next() {
+                                                    Some(Ok(character)) => match state {
+                                                        JsonState::UniDigVal => {
+                                                            field_value.push(character)
+                                                        }
+                                                        JsonState::UniDigName => {
+                                                             field_name.push(character)
+                                                        },
+                                                         _ => unreachable!()
+                                                    }
+                                                    Some(Err(_)) => match state {
+                                                        JsonState::UniDigVal => {
+                                                            field_value.push(char::REPLACEMENT_CHARACTER)
+                                                        }
+                                                        JsonState::UniDigName => {
+                                                             field_name.push(char::REPLACEMENT_CHARACTER)
+                                                        },
+                                                         _ => unreachable!()
+                                                    }
+                                                    None => unreachable!()
+                                                }
+                                            } else {
+                                                surrogates[0] = number as u16;
+                                            }
+                                            surrogate_first = !surrogate_first;
                                              match state {
                                                 JsonState::UniDigVal => {
                                                     state = JsonState::ObjData
@@ -973,7 +1109,34 @@ pub fn parse_fragment<I>(chars: &mut I ) -> (JsonData,char) // TODO return Resul
                                                  _ => unreachable!()
                                             }
                                         },
-                                        None => {eprintln!("Error: Invalid Unicode scalar value!");
+                                        None => {//eprintln!("Error: Invalid Unicode scalar value!");
+                                            if !surrogate_first {
+                                                surrogates[1] = number as u16;
+                                                match char::decode_utf16(surrogates).next() {
+                                                    Some(Ok(character)) => match state {
+                                                        JsonState::UniDigVal => {
+                                                            field_value.push(character)
+                                                        }
+                                                        JsonState::UniDigName => {
+                                                             field_name.push(character)
+                                                        },
+                                                         _ => unreachable!()
+                                                    }
+                                                    Some(Err(_)) => match state {
+                                                        JsonState::UniDigVal => {
+                                                            field_value.push(char::REPLACEMENT_CHARACTER)
+                                                        }
+                                                        JsonState::UniDigName => {
+                                                             field_name.push(char::REPLACEMENT_CHARACTER)
+                                                        },
+                                                         _ => unreachable!()
+                                                    }
+                                                    None => unreachable!()
+                                                }
+                                            } else {
+                                                surrogates[0] = number as u16;
+                                            }
+                                            surrogate_first = !surrogate_first;
                                              match state {
                                                 JsonState::UniDigVal => {
                                                     state = JsonState::ObjData
