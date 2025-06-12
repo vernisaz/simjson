@@ -83,7 +83,24 @@ pub fn parse(json: &str) -> JsonData { // &impl AsRef<str>, Result<JsonData, Str
     let mut chars = binding.chars();
     parse_fragment(&mut chars).0
 }
+/*
+pub struct JsonStr <'a> {
+    chars: &'a dyn Iterator<Item = char>
+}
 
+impl Iterator for JsonStr<'_>  {
+    type Item = JsonData;
+    
+    fn next(&mut self) -> Option<Self::Item> {
+    
+        let res = parse_fragment(self.chars);
+        match res.0 {
+            JsonData::None => None,
+            data => Some(data)
+        }
+    }
+}
+*/
 pub fn parse_fragment<I>(chars: &mut I ) -> (JsonData,char) // error return Result<(JsonData,char),(String,usize,usize)>
     where I: Iterator<Item = char>,  {
     let mut field_value = String::new();
