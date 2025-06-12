@@ -1,6 +1,6 @@
 use std::{collections::HashMap,char};
 
-pub const VERSION: &str = "1.01:014";
+pub const VERSION: &str = "1.02:015";
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum JsonData {
@@ -10,7 +10,8 @@ pub enum JsonData {
     Num(f64),
     Bool(bool),
     Null,
-    None
+    None,
+    Err(String),
 }
 
 #[derive(Debug, Clone, PartialEq, Default)]
@@ -47,6 +48,16 @@ enum JsonState {
     NulL
 }
 
+#[macro_export]
+macro_rules! error {
+    () => {
+        return (JsonData::Err("an error happened".to_string()), 0 as char)
+    };
+    ($($arg:tt)+) => {
+        return (JsonData::Err(format!("an error: {}", format_args!($($arg)+))), 0 as char)
+    };
+}
+
 pub fn get_path_as_text(json: &JsonData, path: &impl AsRef<str>) -> Option<String> {
     let comps = path.as_ref().split('/');
     let mut json = json;
@@ -73,7 +84,7 @@ pub fn parse(json: &str) -> JsonData { // &impl AsRef<str>, Result<JsonData, Str
     parse_fragment(&mut chars).0
 }
 
-pub fn parse_fragment<I>(chars: &mut I ) -> (JsonData,char) // TODO return Result<(JsonData,char),(String,usize,usize)>
+pub fn parse_fragment<I>(chars: &mut I ) -> (JsonData,char) // error return Result<(JsonData,char),(String,usize,usize)>
     where I: Iterator<Item = char>,  {
     let mut field_value = String::new();
      let mut field_name = String::new();
@@ -87,7 +98,13 @@ pub fn parse_fragment<I>(chars: &mut I ) -> (JsonData,char) // TODO return Resul
      let mut dig_inx = String::new(); dig_inx.reserve(4);
      let mut surrogates = [0_u16,0]; let mut surrogate_first = true;
     let mut state = Default::default();
+    let mut char_pos = 0;
+    let mut char_line = 1;
     while let Some(c) = chars.next() {
+        if c == '\n' {
+            char_pos = 0;
+            char_line += 1;
+        }
         match c {
            '"' => {
                match state {
@@ -112,7 +129,7 @@ pub fn parse_fragment<I>(chars: &mut I ) -> (JsonData,char) // TODO return Resul
                         field_value.push(c);
                         state = JsonState::ObjData
                     },
-                    _ => todo!("state {state:?}")
+                    _ => error!("state {state:?} at {char_pos}:{char_line}")
                }
            }
            ' ' | '\t' | '\r' | '\n' => {
@@ -136,7 +153,7 @@ pub fn parse_fragment<I>(chars: &mut I ) -> (JsonData,char) // TODO return Resul
                         //field_value.push('\\');
                         field_value.push(c)
                     }
-                    _ => todo!("state {state:?}")
+                    _ => error!("state {state:?} at {char_line}:{char_pos}")
                    
                }
             }
@@ -177,7 +194,7 @@ pub fn parse_fragment<I>(chars: &mut I ) -> (JsonData,char) // TODO return Resul
                         field_value.push('\\');
                         field_value.push(c)
                     }
-                    _ => todo!("state {state:?}")
+                    _ => error!("state {state:?} at {char_line}:{char_pos}")
                    
                 }
             }
@@ -198,8 +215,7 @@ pub fn parse_fragment<I>(chars: &mut I ) -> (JsonData,char) // TODO return Resul
                         field_value.push('\\');
                         field_value.push(c)
                     }
-                    _ => todo!("state {state:?}")
-                   
+                    _ => error!("state {state:?} at {char_line}:{char_pos}")
                 }
             }
             '\\' => {
@@ -219,7 +235,7 @@ pub fn parse_fragment<I>(chars: &mut I ) -> (JsonData,char) // TODO return Resul
                         field_value.push(c);
                         state = JsonState::ObjData
                     },
-                    _ => todo!()
+                    _ => error!()
                    
                 }
             }
@@ -240,7 +256,7 @@ pub fn parse_fragment<I>(chars: &mut I ) -> (JsonData,char) // TODO return Resul
                         field_value.push(c);
                         state = JsonState::ObjData
                     },
-                    _ => todo!()
+                    _ => error!()
                    
                 }
             }
@@ -270,7 +286,7 @@ pub fn parse_fragment<I>(chars: &mut I ) -> (JsonData,char) // TODO return Resul
                         field_value.push('\\');
                         field_value.push(c)
                     }
-                    _ => todo!("state {state:?}")
+                    _ => error!("state {state:?}")
                 }
             }
             ']' => {
@@ -299,7 +315,7 @@ pub fn parse_fragment<I>(chars: &mut I ) -> (JsonData,char) // TODO return Resul
                         field_value.push('\\');
                         field_value.push(c)
                     }
-                    _ => todo!("state {state:?}")
+                    _ => error!("state {state:?}")
                    
                 }
             }
@@ -328,7 +344,7 @@ pub fn parse_fragment<I>(chars: &mut I ) -> (JsonData,char) // TODO return Resul
                         field_value.push('\\');
                         field_value.push(c)
                     }
-                    _ => todo!("state {state:?}")
+                    _ => error!("state {state:?}")
                     
                 }
             }
@@ -460,7 +476,7 @@ pub fn parse_fragment<I>(chars: &mut I ) -> (JsonData,char) // TODO return Resul
                         field_value.push('\\');
                         field_value.push(c)
                     }
-                    _ => todo!("state {state:?} for {c}")
+                    _ => error!("state {state:?} for {c}")
                 }
             }
             '.' => {
@@ -481,7 +497,7 @@ pub fn parse_fragment<I>(chars: &mut I ) -> (JsonData,char) // TODO return Resul
                         field_value.push('\\');
                         field_value.push(c)
                     }
-                    _ => todo!()
+                    _ => error!()
                    
                 }
             }
@@ -496,7 +512,7 @@ pub fn parse_fragment<I>(chars: &mut I ) -> (JsonData,char) // TODO return Resul
                         field_value.push('\\');
                         field_value.push(c)
                     }
-                    _ => todo!("state {state:?}")
+                    _ => error!("state {state:?}")
                 }
             }
             'E' => {
@@ -590,7 +606,7 @@ pub fn parse_fragment<I>(chars: &mut I ) -> (JsonData,char) // TODO return Resul
                             }
                         }
                     }
-                    _ => todo!("state {state:?}")
+                    _ => error!("state {state:?}")
                 }
             }
             ',' => {
@@ -645,7 +661,7 @@ pub fn parse_fragment<I>(chars: &mut I ) -> (JsonData,char) // TODO return Resul
                         field_value.push('\\');
                         field_value.push(c)
                     }
-                    _ => todo!("state {state:?}")
+                    _ => error!("state {state:?}")
                 }
             }
             't' => {
@@ -663,7 +679,7 @@ pub fn parse_fragment<I>(chars: &mut I ) -> (JsonData,char) // TODO return Resul
                     JsonState::Start => {
                         state = JsonState::BoolT
                     }
-                    _ => todo!("state {state:?}")
+                    _ => error!("state {state:?}")
                 }
             }
             'r' => {
@@ -682,7 +698,7 @@ pub fn parse_fragment<I>(chars: &mut I ) -> (JsonData,char) // TODO return Resul
                         state = JsonState::ObjData;
                         field_value.push('\r')
                     }
-                    _ => todo!("state {state:?}")
+                    _ => error!("state {state:?}")
                 }
             }
             'u' => {
@@ -709,7 +725,7 @@ pub fn parse_fragment<I>(chars: &mut I ) -> (JsonData,char) // TODO return Resul
                         dig_inx.clear();
                         state = JsonState::UniDigVal
                     },
-                    _ => todo!("state {state:?}")
+                    _ => error!("state {state:?}")
                 }
             }
             'U' => {
@@ -730,7 +746,7 @@ pub fn parse_fragment<I>(chars: &mut I ) -> (JsonData,char) // TODO return Resul
                         dig_inx.clear();
                         state = JsonState::UniDigVal
                     },
-                    _ => todo!("state {state:?}")
+                    _ => error!("state {state:?}")
                 }
             }
             'e' => {
@@ -830,7 +846,7 @@ pub fn parse_fragment<I>(chars: &mut I ) -> (JsonData,char) // TODO return Resul
                         field_value.push('\\');
                         field_value.push(c)
                     }
-                    _ => todo!("state {state:?}")
+                    _ => error!("state {state:?}")
                 }
             }
             'f' => {
@@ -921,7 +937,7 @@ pub fn parse_fragment<I>(chars: &mut I ) -> (JsonData,char) // TODO return Resul
                         state = JsonState::ObjData;
                         field_value.push(12 as char);
                     }
-                    _ => todo!("state {state:?}")
+                    _ => error!("state {state:?}")
                 } 
             }
             'a' => {
@@ -1015,7 +1031,7 @@ pub fn parse_fragment<I>(chars: &mut I ) -> (JsonData,char) // TODO return Resul
                         field_value.push('\\');
                         field_value.push(c)
                     }
-                    _ => todo!("state {state:?}")
+                    _ => error!("state {state:?}")
                 }
             }
             'l' => {
@@ -1041,7 +1057,7 @@ pub fn parse_fragment<I>(chars: &mut I ) -> (JsonData,char) // TODO return Resul
                         field_value.push('\\');
                         field_value.push(c)
                     }
-                    _ => todo!("state {state:?}")
+                    _ => error!("state {state:?}")
                 }
             }
             's' => {
@@ -1061,7 +1077,7 @@ pub fn parse_fragment<I>(chars: &mut I ) -> (JsonData,char) // TODO return Resul
                         field_value.push('\\');
                         field_value.push(c)
                     }
-                    _ => todo!("state {state:?}")
+                    _ => error!("state {state:?}")
                 }
             }
             'n' => {
@@ -1079,7 +1095,7 @@ pub fn parse_fragment<I>(chars: &mut I ) -> (JsonData,char) // TODO return Resul
                     JsonState::Start => {
                         state = JsonState::NulN
                     }
-                    _ => todo!("state {state:?}")
+                    _ => error!("state {state:?}")
                 } 
             }
             'b' | 'c' | 'd' | 'B' | 'C' | 'D' | 'A' | 'F' => {
@@ -1172,7 +1188,7 @@ pub fn parse_fragment<I>(chars: &mut I ) -> (JsonData,char) // TODO return Resul
                             field_value.push(c)
                         }
                     }
-                    _ => todo!("state {state:?}")
+                    _ => error!("state {state:?}")
                 } 
             }
             _ => {
@@ -1195,7 +1211,7 @@ pub fn parse_fragment<I>(chars: &mut I ) -> (JsonData,char) // TODO return Resul
                         field_value.push('\\');
                         field_value.push(c)
                     }
-                    _ => todo!("state {state:?} for {c}")
+                    _ => error!("state {state:?} for {c}")
                    
                 }
             }
