@@ -83,11 +83,11 @@ pub fn parse(json: &str) -> JsonData { // &impl AsRef<str>, Result<JsonData, Str
     let mut chars = binding.chars();
     parse_fragment(&mut chars).0
 }
-/*
-pub struct JsonStr <'a> {
-    chars: &'a dyn Iterator<Item = char>
-}
 
+pub struct JsonStr <'a> {
+    chars: &'a dyn Iterator<Item=char>
+}
+/*
 impl Iterator for JsonStr<'_>  {
     type Item = JsonData;
     
