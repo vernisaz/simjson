@@ -85,9 +85,9 @@ pub fn parse(json: &str) -> JsonData { // &impl AsRef<str>, Result<JsonData, Str
 }
 
 pub struct JsonStr <'a> {
-    chars: &'a dyn Iterator<Item=char>
+    chars: &'a mut dyn Iterator<Item=char>
 }
-/*
+
 impl Iterator for JsonStr<'_>  {
     type Item = JsonData;
     
@@ -100,9 +100,9 @@ impl Iterator for JsonStr<'_>  {
         }
     }
 }
-*/
-pub fn parse_fragment<I>(chars: &mut I ) -> (JsonData,char) // error return Result<(JsonData,char),(String,usize,usize)>
-    where I: Iterator<Item = char>,  {
+
+pub fn parse_fragment<I>(chars: &mut I ) -> (JsonData,char) 
+    where I: Iterator<Item = char> + ?Sized,  {
     let mut field_value = String::new();
      let mut field_name = String::new();
      let mut num_value = 0.0;
