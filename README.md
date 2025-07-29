@@ -17,7 +17,7 @@ Use something as below to extract a particular data,
 extern crate simjson;
 ...
 
-let json = simjson::parse(r#"{"name":"malvina", "parent":{"name": "Maria"}}"#);
+let json = simjson::parse(r#"{"name":"Malvika", "parent":{"name": "Maria"}}"#);
 println!("parent:{}", simjson::get_path_as_text(&json, &"parent/name").unwrap_or("unknown".to_string()));
 ```
 
