@@ -696,7 +696,7 @@ pub fn parse_fragment<I>(chars: &mut I ) -> (JsonData,char)
                     JsonState::Start => {
                         state = JsonState::BoolT
                     }
-                    _ => error!("state {state:?}")
+                    _ => error!("state {state:?} at {char_pos}:{char_line}")
                 }
             }
             'r' => {
@@ -715,7 +715,7 @@ pub fn parse_fragment<I>(chars: &mut I ) -> (JsonData,char)
                         state = JsonState::ObjData;
                         field_value.push('\r')
                     }
-                    _ => error!("state {state:?}")
+                    _ => error!("state {state:?} at {char_pos}:{char_line}")
                 }
             }
             'u' => {
@@ -742,7 +742,7 @@ pub fn parse_fragment<I>(chars: &mut I ) -> (JsonData,char)
                         dig_inx.clear();
                         state = JsonState::UniDigVal
                     },
-                    _ => error!("state {state:?}")
+                    _ => error!("state {state:?} at {char_pos}:{char_line}")
                 }
             }
             'U' => {
@@ -763,7 +763,7 @@ pub fn parse_fragment<I>(chars: &mut I ) -> (JsonData,char)
                         dig_inx.clear();
                         state = JsonState::UniDigVal
                     },
-                    _ => error!("state {state:?}")
+                    _ => error!("state {state:?} at {char_pos}:{char_line}")
                 }
             }
             'e' => {
@@ -863,7 +863,7 @@ pub fn parse_fragment<I>(chars: &mut I ) -> (JsonData,char)
                         field_value.push('\\');
                         field_value.push(c)
                     }
-                    _ => error!("state {state:?}")
+                    _ => error!("state {state:?} at {char_pos}:{char_line}")
                 }
             }
             'f' => {
@@ -954,7 +954,7 @@ pub fn parse_fragment<I>(chars: &mut I ) -> (JsonData,char)
                         state = JsonState::ObjData;
                         field_value.push(12 as char);
                     }
-                    _ => error!("state {state:?}")
+                    _ => error!("state {state:?} at {char_pos}:{char_line}")
                 } 
             }
             'a' => {
@@ -1048,7 +1048,7 @@ pub fn parse_fragment<I>(chars: &mut I ) -> (JsonData,char)
                         field_value.push('\\');
                         field_value.push(c)
                     }
-                    _ => error!("state {state:?}")
+                    _ => error!("state {state:?} at {char_pos}:{char_line}")
                 }
             }
             'l' => {
@@ -1074,7 +1074,7 @@ pub fn parse_fragment<I>(chars: &mut I ) -> (JsonData,char)
                         field_value.push('\\');
                         field_value.push(c)
                     }
-                    _ => error!("state {state:?}")
+                    _ => error!("state {state:?} at {char_pos}:{char_line}")
                 }
             }
             's' => {
@@ -1094,7 +1094,7 @@ pub fn parse_fragment<I>(chars: &mut I ) -> (JsonData,char)
                         field_value.push('\\');
                         field_value.push(c)
                     }
-                    _ => error!("state {state:?}")
+                    _ => error!("state {state:?} at {char_pos}:{char_line}")
                 }
             }
             'n' => {
@@ -1112,7 +1112,7 @@ pub fn parse_fragment<I>(chars: &mut I ) -> (JsonData,char)
                     JsonState::Start => {
                         state = JsonState::NulN
                     }
-                    _ => error!("state {state:?}")
+                    _ => error!("state {state:?} at {char_pos}:{char_line}")
                 } 
             }
             'b' | 'c' | 'd' | 'B' | 'C' | 'D' | 'A' | 'F' => {
@@ -1205,7 +1205,7 @@ pub fn parse_fragment<I>(chars: &mut I ) -> (JsonData,char)
                             field_value.push(c)
                         }
                     }
-                    _ => error!("state {state:?}")
+                    _ => error!("state {state:?} at {char_pos}:{char_line}")
                 } 
             }
             _ => {
@@ -1228,7 +1228,7 @@ pub fn parse_fragment<I>(chars: &mut I ) -> (JsonData,char)
                         field_value.push('\\');
                         field_value.push(c)
                     }
-                    _ => error!("state {state:?} for {c}")
+                    _ => error!("state {state:?} for {c} at {char_pos}:{char_line}")
                    
                 }
             }
