@@ -1,5 +1,5 @@
 crate  =simjson
-main=lib
+crate main=lib
 dep_crates=[]
 comp opts=[]
 common =..${~/~}simscript${~/~}comm-crate.7b:file
