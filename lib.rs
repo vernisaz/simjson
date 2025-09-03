@@ -1250,6 +1250,8 @@ pub fn esc_quotes(jstr: String) -> String {
 }
 
 #[cfg(test)]
+use JsonData::{Data,Arr};
+#[cfg(test)]
 fn main() {
     let res = parse("[{\"name\":\"malina\", \"age\":19},{}, 45.8]");
     println!{"{res:?}"}
@@ -1261,4 +1263,18 @@ fn main() {
      println!{"{res:?}"}
     let res = parse(r#"[[0,5],[3,0.2],[{"a\"":"70" ,"b":"28", "S":true},{"c":"d\"","Mar":false,"x":[4, 8 ] }]]"#);
      println!{"{res:?}"}
+    let json_str = r#"{"simple":"json"}
+         {"another":true} ["again","stop"]
+         {"not again":false}
+"#;
+    let mut chars = json_str.chars();
+    loop {
+        let res = parse_fragment(&mut chars);
+        let json = match res.0 {
+            Data(json) => println!("{json:?}"),
+            Arr(json) => println!("{json:?}"),
+            JsonData::None => {println!("end of fragments");break},
+            _ => {eprintln!("invalid json {:?}", res.0);break},
+        };
+    }
 }
