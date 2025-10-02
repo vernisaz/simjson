@@ -23,9 +23,9 @@ println!("parent:{}", simjson::get_path_as_text(&json, &"parent/name").unwrap_or
 
 ## Build
 Use [RustBee](https://github.com/vernisaz/rust_bee) to build the crate. Script [bee.7b](./bee.7b) is provided.
-Modify **crate_dir** if you use other than standard its location.
+Modify `crate_dir` if you use other its location than the standard one.
 
-Cargo manifest *toml* can be added in case of Cargo preferences.
+Cargo manifest *toml* can be added in case of Cargo usage.
 
 ## Microlibrary
-This crate uses a concept of Microlibrary described in the [article](https://www.linkedin.com/pulse/micro-libraries-vs-mega-dmitriy-rogatkin-q6e6c).
+This crate uses the concept of the Microlibrary described in the [article](https://www.linkedin.com/pulse/micro-libraries-vs-mega-dmitriy-rogatkin-q6e6c).
