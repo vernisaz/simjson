@@ -62,14 +62,11 @@ pub fn get_path_as_text(json: &JsonData, path: &impl AsRef<str>) -> Option<Strin
     let comps = path.as_ref().split('/');
     let mut json = json;
     for cur in comps {
-        match json {
-            JsonData::Data(json_n) => {
-                match json_n.get(cur) {
-                    Some(json_n) => json = json_n,
-                    _ => return None
-                }
-            },
-            _ => ()
+        if let JsonData::Data(json_n) = json {
+            match json_n.get(cur) {
+                 Some(json_n) => json = json_n,
+                 _ => return None
+            }
         }
     }
     match json {
