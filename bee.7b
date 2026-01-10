@@ -8,5 +8,8 @@ common =..${~/~}simscript${~/~}comm-crate.7b:file
 common test =..${~/~}simscript${~/~}comm-test.7b:file
 crate_dir=..${~/~}crates
 
+version="1.02:016"
+set_env(VERSION,version)
+
 include(common test);
 include(common);

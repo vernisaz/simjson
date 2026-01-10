@@ -1,6 +1,6 @@
 use std::{collections::HashMap,char};
 
-pub const VERSION: &str = "1.02:015";
+pub const VERSION: &str = env!("VERSION");
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum JsonData {
