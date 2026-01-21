@@ -23,7 +23,7 @@ println!("parent:{}", simjson::get_path_as_text(&json, &"parent/name").unwrap_or
 
 ## Build
 Use [RustBee](https://github.com/vernisaz/rust_bee) to build the crate. Script [bee.7b](./bee.7b) is provided.
-Modify `crate_dir` if you use other its location than the standard one.
+Modify `crate_dir` if you use its other location than the specified.
 
 Cargo manifest *toml* can be added in case of Cargo usage.
 
