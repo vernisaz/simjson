@@ -29,11 +29,11 @@ Cargo manifest *toml* can be added in a case of Cargo usage, for example,
 ```cargo
 [package]
 name = "simjson"
-version = "1.02:016"
+version = "1.02:017"
 edition = "2024"
 
 [env]
-VERSION = "1.02:016"
+VERSION = "1.02:017"
 
 [dependencies]
 ```

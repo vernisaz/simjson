@@ -1,3 +1,4 @@
+//! A simple JSON parser with zero dependencies
 use std::{char, collections::HashMap};
 
 pub const VERSION: &str = env!("VERSION");
@@ -58,6 +59,10 @@ macro_rules! error {
     };
 }
 
+/// Returns a content of the specified JSON path as `String` or `None`
+/// if the path doesn't exist or cares a different data type
+///
+/// It expects that JSON is already parsed and retrieves a `String` from `JsonData`
 pub fn get_path_as_text(json: &JsonData, path: &impl AsRef<str>) -> Option<String> {
     let comps = path.as_ref().split('/');
     let mut json = json;
@@ -75,6 +80,7 @@ pub fn get_path_as_text(json: &JsonData, path: &impl AsRef<str>) -> Option<Strin
     }
 }
 
+/// Parses a `&str` to `JsonData`
 pub fn parse(json: &str) -> JsonData {
     // &impl AsRef<str>, Result<JsonData, String>
     let binding = json.to_string();
@@ -98,6 +104,11 @@ impl Iterator for JsonStr<'_> {
     }
 }
 
+/// Parses JSON data using `char` `Iterator`
+///
+/// It stops parsing as reaches the end of JSON data, however the input
+/// `Iterator` can produce more data,so sequention call of the function
+/// will parse a next fragment until the iterator is completely exausted [JsonData::None]. 
 pub fn parse_fragment<I>(chars: &mut I) -> (JsonData, char)
 where
     I: Iterator<Item = char> + ?Sized,
