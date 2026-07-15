@@ -29,14 +29,14 @@ Cargo manifest *toml* can be added in a case of Cargo usage, for example,
 ```cargo
 [package]
 name = "simjson"
-version = "1.02:017"
+version = "1.02:018"
 edition = "2024"
 
 [env]
-VERSION = "1.02:017"
+VERSION = "1.02:018"
 
 [dependencies]
 ```
 
 ## Microlibrary
-This crate uses the concept of the Microlibrary described in the [article](https://www.linkedin.com/pulse/micro-libraries-vs-mega-dmitriy-rogatkin-q6e6c).
+This crate uses a concept of the Microlibrary described in the [article](https://www.linkedin.com/pulse/micro-libraries-vs-mega-dmitriy-rogatkin-q6e6c).

@@ -1,8 +1,18 @@
 //! A simple JSON parser with zero dependencies
-use std::{char, collections::HashMap};
+use std::{borrow::Cow, char, collections::HashMap};
 
 pub const VERSION: &str = env!("VERSION");
 
+/// enum containing JSON element
+///
+/// * Text element presented by String
+/// * Embedded JSON data
+/// * Array of JSON elements
+/// * Number
+/// * Boolean value
+/// * Null
+/// * No element
+/// * An error, the element can't be parsed accordingly JSON rules
 #[derive(Debug, Clone, PartialEq)]
 pub enum JsonData {
     Text(String),
@@ -60,7 +70,7 @@ macro_rules! error {
 }
 
 /// Returns a content of the specified JSON path as `String` or `None`
-/// if the path doesn't exist or cares a different data type
+/// if the path doesn't exist or carries a different data type
 ///
 /// It expects that JSON is already parsed and retrieves a `String` from `JsonData`
 pub fn get_path_as_text(json: &JsonData, path: &impl AsRef<str>) -> Option<String> {
@@ -107,8 +117,11 @@ impl Iterator for JsonStr<'_> {
 /// Parses JSON data using `char` `Iterator`
 ///
 /// It stops parsing as reaches the end of JSON data, however the input
-/// `Iterator` can produce more data,so sequention call of the function
-/// will parse a next fragment until the iterator is completely exausted [JsonData::None]. 
+/// `Iterator` can produce more data, so a sequention call of the function
+/// will parse a next fragment until the iterator is completely exausted [JsonData::None].
+/// # returns
+/// A tuple with JsonData and current char which supposes to be consumed by the
+/// parser internally.
 pub fn parse_fragment<I>(chars: &mut I) -> (JsonData, char)
 where
     I: Iterator<Item = char> + ?Sized,
@@ -1066,16 +1079,32 @@ where
     (JsonData::None, char::from_u32(0).unwrap())
 }
 
-pub fn esc_quotes(jstr: String) -> String {
-    let mut res = String::new();
+/// Escapes quotes in the given String
+///
+pub fn esc_quotes(jstr: &str) -> Cow<'_, str> {
+    let mut is_esc = false;
     for c in jstr.chars() {
         match c {
-            '"' | '\\' => res.push('\\'),
+            '"' | '\\' => {
+                is_esc = true;
+                break;
+            }
             _ => (),
         }
-        res.push(c)
     }
-    res
+    if is_esc {
+        let mut res = String::new();
+        for c in jstr.chars() {
+            match c {
+                '"' | '\\' => res.push('\\'),
+                _ => (),
+            }
+            res.push(c)
+        }
+        Cow::Owned(res)
+    } else {
+        Cow::Borrowed(jstr)
+    }
 }
 
 #[cfg(test)]
