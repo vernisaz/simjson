@@ -73,7 +73,7 @@ macro_rules! error {
 /// if the path doesn't exist or carries a different data type
 ///
 /// It expects that JSON is already parsed and retrieves a `String` from `JsonData`
-pub fn get_path_as_text(json: &JsonData, path: &impl AsRef<str>) -> Option<String> {
+pub fn get_path_as_text(json: &JsonData, path: impl AsRef<str>) -> Option<String> {
     let comps = path.as_ref().split('/');
     let mut json = json;
     for cur in comps {
@@ -1130,7 +1130,7 @@ fn main() {
     let mut chars = json_str.chars();
     loop {
         let res = parse_fragment(&mut chars);
-        let json = match res.0 {
+        match res.0 {
             Data(json) => println!("{json:?}"),
             Arr(json) => println!("{json:?}"),
             JsonData::None => {
